@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace를 Dao의 package를 포함한 인터페이스 명과 동일하게 선언해야 한다. -->
+<mapper namespace='com.ssafy.trip.hotplace.model.dao.HotPlaceDao'>
+	<!-- 자주 사용하는 동적쿼리를 sql 태그를 통해 지정해서 재사용하기 -->
+	<sql id="searchCon">
+		<if test="word !=null and word !='' ">
+			<choose>
+				<when test=" key == 'hotId' ">
+					hotId = #{word}
+				</when>
+				<when test=" key == 'title' ">
+					title like concat('%',#{word},'%')
+				</when>
+				<when test=" key == 'userId' ">
+					userId like concat('%',#{word},'%')
+				</when>
+			</choose>
+		</if>
+	</sql>
+	<resultMap type="HotPlace" id="articleMap">
+		<id column="hotId" property="hotId" />
+		<result column="userId" property="userId" />
+		<result column="title" property="title" />
+		<result column="content" property="content" />
+		<result column="hit" property="hit" />
+		<result column="createDate" property="createDate" />
+		<collection property="fileInfos" 
+			javaType="list" ofType="fileInfoDto" resultMap="fileMap" />
+	</resultMap>
+<!-- 	<resultMap type="HotPlace" id="viewArticle" extends="articleMap">
+		<collection property="fileInfos" column="hotId"
+			javaType="list" ofType="fileInfoDto" select="fileInfoList" />
+	</resultMap> -->
+	<resultMap type="fileInfoDto" id="fileMap">
+		<id		column="file_id"	 property="fileId"/>
+		<result column="save_folder" property="saveFolder" />
+		<result column="original_file" property="originalFile" />
+		<result column="save_file" property="saveFile" />
+	</resultMap>
+	<!-- id는 Dao의 메서드 이름과 동일해야 한다. -->
+	<select id="listArticle" parameterType="HotPlacePageBean"
+		resultType="HotPlace">
+		select * from hotplace_board
+		<where>
+			<include refid="searchCon" />
+		</where>
+		<choose>
+			<when test="order == null or order =='' ">
+				order by hotId desc
+			</when>
+			<when test="order == 'view' ">
+				order by hit desc
+			</when>
+			<when test="order == 'newest' ">
+				order by createDate desc
+			</when>
+			<when test="order == 'recommended' ">
+				order by hotId desc
+			</when>
+		</choose>
+		limit #{start}, #{interval}
+	</select>
+	<!-- id는 Dao의 메서드 이름과 동일해야 한다. -->
+	<select id="listArticleAll" resultMap="articleMap">
+		<!-- SELECT h.hotId, h.userId, h.title, h.content, h.hit, f.original_file 
+			AS originalFile, f.save_file AS saveFile, h.createDate FROM hotplace_board 
+			h LEFT JOIN hotplace_file_info f ON h.hotId = f.hotId -->
+		SELECT h.hotId, h.userId, h.title, h.content, h.hit, f.file_id
+		, f.original_file, f.save_file, h.createDate
+		FROM hotplace_board h
+		LEFT JOIN hotplace_file_info f ON h.hotId = f.hotId
+		<where>
+			<include refid="searchCon" />
+		</where>
+		<choose>
+			<when test="order == null or order =='' ">
+				order by hotId desc
+			</when>
+			<when test="order == 'view' ">
+				order by hit desc
+			</when>
+			<when test="order == 'newest' ">
+				order by createDate desc
+			</when>
+			<when test="order == 'recommended' ">
+				order by hotId desc
+			</when>
+		</choose>
+
+	</select>
+	<select id="fileInfoList" resultMap="fileMap">
+		select
+		original_file , save_file
+		from hotplace_file_info
+		where hotId = #{hotId}
+	</select>
+	<select id="getTotalArticleCount"
+		parameterType="HotPlacePageBean" resultType="int">
+		select count(hotId) from hotplace_board
+		<where>
+			<include refid="searchCon" />
+		</where>
+	</select>
+	<!-- <select id="getArticle" parameterType="int" resultMap="viewArticle"> 
+		select h.hotId, h.userId, h.title, h.content, h.hit, f.*, h.createDate from 
+		hotplace_board h left join (select original_file as originalFile, save_file 
+		as saveFile from hotplace_file_info where hotId = #{hotId}) f using (hotId) 
+		</select> -->
+	<select id="getArticle" parameterType="int"
+		resultMap="articleMap">
+		SELECT 
+		h.hotId, h.userId, h.title, h.content, h.hit,
+		f.original_file,f.save_file, h.createDate
+		FROM hotplace_board h
+		LEFT JOIN hotplace_file_info f 
+		ON h.hotId = f.hotId
+		WHERE h.hotId = #{hotId}
+	</select>
+	<insert id="uploadFile" parameterType="HotPlace">
+		insert into hotplace_file_info (hotId, save_folder, original_file,
+		save_file)
+		values
+		<foreach collection="fileInfos" item="fileinfo"
+			separator=" , ">
+			(#{hotId}, #{fileinfo.saveFolder},
+			#{fileinfo.originalFile}, #{fileinfo.saveFile})
+		</foreach>
+	</insert>
+	<insert id="writeArticle" parameterType="HotPlace">
+		insert into hotplace_board (userId, title, content, hit, createDate)
+		values (#{userId}, #{title}, #{content}, 0, now())
+		<selectKey resultType="int" keyProperty="hotId"
+			order="AFTER">
+			select last_insert_id()
+		</selectKey>
+	</insert>
+	<update id="modifyArticle" parameterType="HotPlace">
+		update hotplace_board
+		set title=#{title},
+		content=#{content}
+		where hotId = #{hotId}
+	</update>
+
+	<delete id="deleteArticle" parameterType="int">
+		delete from
+		hotplace_board
+		where hotId = #{hotId}
+	</delete>
+	
+	<delete id="deleteImage" parameterType="int">
+		delete from
+		hotplace_file_info
+		where hotId = #{hotId}
+	</delete>
+	
+	<update id="updateHit" parameterType="int">
+		update hotplace_board
+		set
+		hit = hit+1
+		where hotId = #{hotId}
+	</update>
+
+</mapper>    
+
+
+
+

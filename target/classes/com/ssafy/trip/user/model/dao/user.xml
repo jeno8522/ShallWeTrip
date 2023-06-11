@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<!-- namespace를 Dao의 package를 포함한 인터페이스 명과 동일하게 선언해야 한다.  -->    
+<mapper  namespace='com.ssafy.trip.user.model.dao.UserDao'>
+	<select id='search'			parameterType="string"		resultType="User">
+		select id as userid, password as userpwd, name, email,nickname from user where id=#{userid}
+	</select>
+	
+	<insert id='regist'			parameterType="User"		>
+		insert into user(id, name, password, email, nickname) 
+		values(#{userid}, #{name}, #{userpwd}, #{email}, #{nickname})
+	</insert>
+	
+	<update id='update'			parameterType="User"		>
+		update  user set  name=#{name}, password=#{userpwd}, email=#{email}, nickname=#{nickname}  
+		where  id=#{userid}
+	</update>
+	
+	<delete id='remove'			parameterType="string"		>
+		delete from user 
+		where  id=#{userid}
+	</delete>
+	
+		<select id="getRefreshToken" parameterType="string" resultType="string">
+		select token
+		from user
+		where id = #{userid}
+	</select>
+	
+	<update id="saveRefreshToken" parameterType="map">
+		update user
+		set token = #{token}
+		where id = #{userid}
+	</update>
+	
+	<update id="deleteRefreshToken" parameterType="map">
+		update user
+		set token = #{token, jdbcType=VARCHAR}
+		where id = #{userid}
+	</update>
+	
+</mapper>
+
+
+
+
+
+    

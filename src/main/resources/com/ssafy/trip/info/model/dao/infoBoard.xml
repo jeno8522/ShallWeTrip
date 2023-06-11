@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<!-- namespace를 Dao의 package를 포함한 인터페이스 명과 동일하게 선언해야 한다.  -->    
+<mapper  namespace='com.ssafy.trip.infoBoard.model.dao.InfoBoardDao'>
+	<!--
+		자주 사용하는 동적쿼리를 sql 태그를 통해 지정해서 재사용하기
+	  -->
+	  <sql id="searchCon">
+	  	<if test="word !=null and word !='' ">
+	  		<choose>
+	  			<when test=" key == 'info_id' ">
+	  				info_id = #{word} 
+	  			</when>
+	  			<when test=" key == 'title' ">
+	  				title like  concat('%',#{word},'%') 
+	  			</when>
+	  			<when test=" key == 'user_id' ">
+	  				user_id like  concat('%',#{word},'%') 
+	  			</when>
+	  		</choose>
+	  	</if>
+	  </sql>
+
+	<!-- id는 Dao의 메서드 이름과 동일해야 한다.  -->
+	<select id="listArticle"		parameterType="PageBean"	resultType="InfoBoard">
+		select info_id as infoId, user_id as userId, title, content, hit, create_date as createDate from info_board
+		<where>
+			<include refid="searchCon"/>		
+		</where>
+ 		<choose>
+			<when test="order == null or order =='' ">
+				order by info_id desc
+			</when>
+			<when test="order == 'view' ">
+				order by hit desc
+			</when>
+		</choose>
+		limit #{start}, #{interval} 
+	</select>
+	
+		<!-- id는 Dao의 메서드 이름과 동일해야 한다.  -->
+	<select id="listArticleAll" resultType="InfoBoard">
+		select info_id as infoId, user_id as userId, title, content, hit, create_date as createDate from info_board
+		<where>
+			<include refid="searchCon"/>		
+		</where>
+ 		<choose>
+			<when test="order == null or order =='' ">
+				order by info_id desc
+			</when>
+			<when test="order == 'view' ">
+				order by hit desc
+			</when>
+		</choose>
+	</select>
+	
+	<select id="getTotalArticleCount"		parameterType="PageBean"	resultType="int">
+		select count(info_id) from info_board
+		<where>
+			<include refid="searchCon"/>		
+		</where> 
+	</select>
+	
+	<!-- 
+		기본 Alias : mybatis-xxx.jar에서 org.apache.ibatis.type.TypeAliasRegistry에서 확인
+	
+		parameter mapping  : #{이름} 
+		 - String or Primitive 인 경우 :  #{이름}   => 어떤 이름이든 상과 없음
+	     - DTO or Map		: #{속성이름}
+	 -->
+	<select id="getArticle"				parameterType="int" 		resultType="InfoBoard">
+		select info_id as infoId, user_id as userId, title, content, hit, create_date as createDate from info_board where info_id = #{infoId}
+	</select>
+
+	<insert id="writeArticle"				parameterType="InfoBoard">
+		insert into info_board (title, content, user_Id) 
+		values(#{title}, #{content}, #{userId}) 
+	</insert>
+	
+	<update id="modifyArticle"				parameterType="InfoBoard">
+		update info_board set title=#{title}, 
+						content=#{content} 
+		where info_id = #{infoId} 
+	</update>
+	
+	<delete id="deleteArticle"				parameterType="int">
+		delete from info_board
+		where info_id = #{infoId} 
+	</delete>
+	
+	<update id="updateHit" parameterType="int">
+		update info_board 
+		set hit = hit+1 
+		where info_id = #{infoId} 
+	</update>
+	
+</mapper>    
+
+
+
+

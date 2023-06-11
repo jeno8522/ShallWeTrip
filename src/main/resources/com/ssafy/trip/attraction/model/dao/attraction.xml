@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<!-- namespace를 Dao의 package를 포함한 인터페이스 명과 동일하게 선언해야 한다.  -->    
+<mapper  namespace='com.ssafy.trip.attraction.model.dao.AttractionDao'>
+	<sql id="search">
+		<if test="sido != 0 and sido != null ">
+			and	ai.sido_code = #{sido} 
+		</if>
+		<if test="gugun !=0 and gugun != null ">
+			and ai.gugun_code = #{gugun} 
+		</if>
+		<if test="contentTypeId != 0 and contentTypeId != null ">
+			and ai.content_type_id = #{contentTypeId} 
+		</if>
+		<if test="keyword != null and keyword != '' ">
+			and ai.title like concat('%', #{keyword}, '%') 
+		</if>
+	</sql>
+	
+	
+	<select id='searchAll'			parameterType="map"		resultType="Attraction">
+		 select ai.content_id as contentId, ai.content_type_id as contentTypeId,
+				ai.title , ai.addr1, ai.addr2, ai.tel, ai.first_image as image, 
+				ai.latitude, ai.longitude, ad.homepage, ad.overview 
+			 from  attraction_description ad, attraction_info ai 
+		 where ai.content_id = ad.content_id 
+		<include refid="search"></include>
+		limit 0, 500
+	</select>
+	
+	
+</mapper>
+
+
+
+
+
+    
