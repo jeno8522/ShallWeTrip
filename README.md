@@ -2,12 +2,14 @@
 # 관통프로젝트: 
 ### 프로젝트이름 : ShallWeTrip
 ### 프로젝트 설명 : 사용자에게 편리한 여행 정보를 제공하고, 사용자끼리 정보 공유를 할 수 있는 플랫폼
-### BackEnd : 최상위 폴더 내
-### FrontEnd : vue 폴더 내의 Vue 프로젝트
-### schema 폴더 : 모델링 파일, schema 및 data를 export 결과
-### 문서 폴더 추가 : PPT 및 프로젝트 설계 문서 제출
-### 프로젝트 보고서 URL : https://docs.google.com/presentation/d/137pyRj2ONu_y35WupDPBEm_usQtMG0-o/edit?usp=sharing&ouid=106137414365360011984&rtpof=true&sd=true
 ### 제출일: 2023.05.25일 23시 59분
+
+#### BackEnd : 최상위 폴더 내
+#### FrontEnd : vue 폴더 내의 Vue 프로젝트
+#### schema 폴더 : 모델링 파일, schema 및 data를 export 결과
+#### 문서 폴더 : PPT 및 프로젝트 설계 문서
+#### 프로젝트 PPT URL : https://docs.google.com/presentation/d/137pyRj2ONu_y35WupDPBEm_usQtMG0-o/edit?usp=sharing&ouid=106137414365360011984&rtpof=true&sd=true
+
 
 ### 참여 페어
 - 임하은(조장), 주창훈
